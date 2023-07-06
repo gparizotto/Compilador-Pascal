@@ -1,6 +1,6 @@
 program exemplo1;
 	var 
-		n, s, i: integer
+		n, s, i: integer;
 	procedure soma;
 		var q: integer;
 	begin

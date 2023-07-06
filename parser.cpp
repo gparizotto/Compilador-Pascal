@@ -285,7 +285,7 @@ int scanner(FILE *arquivo)
 
 bool parte_de_declaracoes_de_rotulos(int *index)
 {
-    if (atomos[*index].first != "label") return false;
+    if (atomos[*index].first != "label") return true;
     ++(*index);
 
     for (char c : atomos[*index].first)
@@ -338,20 +338,17 @@ bool declaracao_de_variaveis(int *index)
     if (!tipo(atomos[*index].first)) return false;
     ++(*index);
 
-    if (atomos[*index].first != ";") return false;
-    ++(*index);
-
     return true;
 }
 
 bool parte_de_declaracoes_de_variaveis(int *index)
 {
-    if (atomos[*index].first != "var") return false;
+    if (atomos[*index].first != "var") return true;
     ++(*index);
 
     if (!declaracao_de_variaveis(index)) return false;
 
-    while (atomos[*index].first == ";")
+    while (atomos[*index].first == ";" && !pertence_palavras_reservadas(atomos[*index + 1].first))
     {
         ++(*index);
         if (declaracao_de_variaveis(index)) return false;
@@ -694,9 +691,9 @@ bool comando_composto(int *index)
 
 bool bloco(int *index)
 {
-    parte_de_declaracoes_de_rotulos(index);
-    parte_de_declaracoes_de_variaveis(index);
-    parte_de_declaracoes_de_sub_rotinas(index);
+    if (!parte_de_declaracoes_de_rotulos(index)) return false;
+    if (!parte_de_declaracoes_de_variaveis(index)) return false;
+    if (!parte_de_declaracoes_de_sub_rotinas(index)) return false;
 
     if (!comando_composto(index)) return false;
 
@@ -737,7 +734,7 @@ int main()
 
     init();
 
-    arquivo = fopen("programa.pas", "r"); 
+    arquivo = fopen("programa.pas", "r");
 
     if (arquivo == NULL)
     {
@@ -753,10 +750,11 @@ int main()
         cout << "Analise sintatica realizada com sucesso\n";
     else
     {
-        cout << "Erro na analise sintatica\n\nErro na linha: " << atomos[index].second << '\n' <<
-                    "No atomo: " << atomos[index].first << '\n';
+        cout << "Erro na analise sintatica\n\nErro na linha: "
+             << atomos[index].second << '\n'
+             << "No atomo: " << atomos[index].first << '\n';
 
-        return 1;     
+        return 1;
     }
 
     cout << "\n\n" << programa_gerado << '\n';
